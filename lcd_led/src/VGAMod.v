@@ -22,7 +22,7 @@ module VGAMod
 	localparam      HightPixel  = 16'd480;
 	localparam      V_FrontPorch= 16'd45; //62
 
-	localparam      H_BackPorch = 16'd182; 	//NOTE: 高像素时钟时，增加这里的延迟，方便K210加入中断
+	localparam      H_BackPorch = 16'd182; 	//REMARQUE : lorsque l'horloge des pixels est élevée, augmentez le délai ici pour permettre au K210 d'ajouter des interruptions.
 	localparam      H_Pluse 	= 16'd1; 
 	localparam      WidthPixel  = 16'd800; 
 	localparam      H_FrontPorch= 16'd210;
@@ -61,17 +61,17 @@ module VGAMod
 			Data_B <= 9'b0;
             end
 	end
-	//注意这里HSYNC和VSYNC负极性
+	//注意这里HSYNC和VSYNC负极性 Notez la polarité négative de HSYNC et VSYNC ici
     assign  LCD_HSYNC = (( PixelCount >= H_Pluse)&&( PixelCount <= (PixelForHS-H_FrontPorch))) ? 1'b0 : 1'b1;
-    //assign  LCD_VSYNC = ((( LineCount  >= 0 )&&( LineCount  <= (V_Pluse-1) )) ) ? 1'b1 : 1'b0;		//这里不减一的话，图片底部会往下拖尾？
+    //assign  LCD_VSYNC = ((( LineCount  >= 0 )&&( LineCount  <= (V_Pluse-1) )) ) ? 1'b1 : 1'b0;		//这里不减一的话，图片底部会往下拖尾？Si vous n’en soustrayez pas un ici, le bas de l’image va-t-il descendre vers le bas ?
 	assign  LCD_VSYNC = ((( LineCount  >= V_Pluse )&&( LineCount  <= (LineForVS-0) )) ) ? 1'b0 : 1'b1;
-    //assign  FIFO_RST  = (( PixelCount ==0)) ? 1'b1 : 1'b0;  //留给主机H_BackPorch的时间进入中断，发送数据
+	//assign  FIFO_RST  = (( PixelCount ==0)) ? 1'b1 : 1'b0;  //留给主机H_BackPorch的时间进入中断，发送数据 Temps restant à l'hôte H_BackPorch pour saisir l'interruption et envoyer les données
 
     assign  LCD_DE = (  ( PixelCount >= H_BackPorch )&&
                         ( PixelCount <= PixelForHS-H_FrontPorch ) &&
                         ( LineCount >= V_BackPorch ) &&
                         ( LineCount <= LineForVS-V_FrontPorch-1 ))  ? 1'b1 : 1'b0;
-						//这里不减一，会抖动
+						//这里不减一，会抖动 Si vous n’en soustrayez pas un ici, cela tremblera.
 
     // assign  LCD_R   =   (PixelCount<200)? 5'b00000 : 
     //                     (PixelCount<240 ? 5'b00001 :    
